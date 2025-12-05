@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: issue_tracker
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/issue_tracker_dev
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update   # dev only. we will kill this later.
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  jackson:
+    time-zone: Asia/Kolkata
+
+server:
+  port: 8080
