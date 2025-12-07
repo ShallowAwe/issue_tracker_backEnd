@@ -83,6 +83,8 @@ public class TeamServiceImpl implements TeamService {
             throw new RuntimeException("User Already Exists In This Team");
         }
 
+
+        //ENforcing it Correctly
         // ✅ Enforce only ONE TeamLead per team
         if (role == TeamRole.TEAM_LEAD &&
                 teamMemberRepository.existsByTeamIdAndRole(teamId, TeamRole.TEAM_LEAD)) {
