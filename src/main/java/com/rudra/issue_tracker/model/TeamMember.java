@@ -1,48 +1,29 @@
 package com.rudra.issue_tracker.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(
-        name = "team_members",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_team_members_user_team",
-                        columnNames = {"user_id", "team_id"}
-                )
-        }
-)
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
+@Table(name = "project_teams", uniqueConstraints = @UniqueConstraint(columnNames = {"project_id", "team_id"}))
 public class TeamMember {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
-
-    // FK to users.id (no relationship yet, by design)
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
-
-    // FK to teams.id (no relationship yet, by design)
-    @Column(name = "team_id", nullable = false)
-    private Long teamId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false, length = 30)
-    private TeamRole role;
-
-    @Column(name = "joined_at", nullable = false, updatable = false)
-    private LocalDateTime joinedAt;
-
-    @PrePersist
-    protected void onJoin() {
-        this.joinedAt = LocalDateTime.now();
-    }
+    @ManyToOne
+    private Team team;
+    @ManyToOne
+    private User user;
+    @Column
+    private String roleInTeam;
 }

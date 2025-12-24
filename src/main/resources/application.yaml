@@ -1,4 +1,6 @@
 spring:
+  flyway:
+    enabled: false
   application:
     name: issue_tracker
 
@@ -10,7 +12,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update   # dev only. we will kill this later.
+      ddl-auto: update   # DEV ONLY. Must be validate in prod.
     show-sql: true
     properties:
       hibernate:
@@ -22,3 +24,13 @@ spring:
 
 server:
   port: 8080
+
+app:
+  jwt-secret: dGhpc2lzYXZlcnlzZWNyZXRrZXl0aGF0aXNsb25nZW5vdWdoZm9ySFMyNTZhbGdvcml0aG1hbmRpdHNob3VsZGJla2VwdHNlY3VyZQ==
+  jwt-expiration: 86400000
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

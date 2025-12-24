@@ -1,37 +1,28 @@
 package com.rudra.issue_tracker.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "teams")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Team {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
-
-    @Column(name = "name", nullable = false, unique = true, length = 100)
-    private String name;
-
-    @Column(name = "description", length = 300)
+    @Column(nullable = false) private String name; // "Dev Team", "QA Team"
     private String description;
-
-    @Column(name = "created_by", nullable = false, updatable = false)
-    private Long createdBy;   // FK to users.id (we add relationship later)
-
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
+
 }
