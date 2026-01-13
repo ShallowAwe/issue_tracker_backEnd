@@ -19,6 +19,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -33,6 +35,8 @@ public class AuthController {
 
     // Handles all user-related database logic
     private final UserService userService;
+    
+    
 
     /**
      * ✅ USER REGISTRATION
@@ -124,4 +128,22 @@ public class AuthController {
                     .body("Login failed due to server error");
         }
     }
+
+    @GetMapping("/user-details")
+    public ResponseEntity<User> getUserDetails(Authentication authentication) {
+
+        String username = authentication.getName();
+
+        User userDetails = userService.findByUsername(username);
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(userDetails);
+    }
+
+
+
+
 }

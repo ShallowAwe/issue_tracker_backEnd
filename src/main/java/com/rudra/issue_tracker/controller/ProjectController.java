@@ -11,6 +11,7 @@ import com.rudra.issue_tracker.service.ProjectMemberService;
 import com.rudra.issue_tracker.service.ProjectService;
 import com.rudra.issue_tracker.service.UserService;
 
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,7 @@ public class ProjectController {
     @PostMapping("/create")
     public ResponseEntity<?> createProject(@Validated @RequestBody CreateProjectRequest request,
                                            Authentication authentication) {
+
         try {
             // Fetch currently authenticated user
             User owner = userService.findByUsername(authentication.getName());
@@ -48,13 +50,20 @@ public class ProjectController {
                     request.getDescription(),
                     owner
             );
-            projectMemberService.addMember(project, owner, "OWNER");
+
+            // Auto-assign creator as OWNER
+            projectMemberService.addMember(
+                    project.getKey(),
+                    owner.getId(),
+                    "OWNER"
+            );
+
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(toResponse(project));
 
         } catch (IllegalArgumentException e) {
-            // Duplicate key or validation failure
+            // Duplicate key, invalid data, user already member, etc.
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponse(
@@ -64,7 +73,7 @@ public class ProjectController {
                     ));
 
         } catch (NotFoundException e) {
-            // Authenticated user not found in DB
+            // User not found, role not found
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(new ErrorResponse(
@@ -74,16 +83,17 @@ public class ProjectController {
                     ));
 
         } catch (Exception e) {
-            // Unexpected server failure
+            // Database errors, unexpected failures
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ErrorResponse(
-                            "Failed to create project",
+                            "Failed to create project: " + e.getMessage(),
                             HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             LocalDateTime.now()
                     ));
         }
     }
+
 
     /**
      * ✅ GET ALL PROJECTS
@@ -186,6 +196,8 @@ public class ProjectController {
         }
     }
 
+
+
     /**
      * ✅ ENTITY → API RESPONSE MAPPER
      */
@@ -200,5 +212,8 @@ public class ProjectController {
                 .createdAt(project.getCreatedAt())
                 .updatedAt(project.getUpdatedAt())
                 .build();
+
     }
+
+
 }

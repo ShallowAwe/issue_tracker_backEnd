@@ -4,9 +4,11 @@ package com.rudra.issue_tracker.config;
 import com.rudra.issue_tracker.model.IssuePriority;
 import com.rudra.issue_tracker.model.IssueStatus;
 import com.rudra.issue_tracker.model.IssueType;
+import com.rudra.issue_tracker.model.ProjectRole;
 import com.rudra.issue_tracker.repository.IssuePriorityRepository;
 import com.rudra.issue_tracker.repository.IssueStatusRepository;
 import com.rudra.issue_tracker.repository.IssueTypeRepository;
+import com.rudra.issue_tracker.repository.ProjectRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -18,12 +20,14 @@ public class DataSeeder implements CommandLineRunner {
     private final IssueTypeRepository issueTypeRepository;
     private final IssuePriorityRepository issuePriorityRepository;
     private final IssueStatusRepository issueStatusRepository;
+    private final ProjectRoleRepository projectRoleRepository;
 
     @Override
     public void run(String... args) {
         seedIssueTypes();
         seedIssuePriorities();
         seedIssueStatuses();
+        seedProjectRoles();
     }
 
     private void seedIssueTypes() {
@@ -79,4 +83,25 @@ public class DataSeeder implements CommandLineRunner {
             );
         }
     }
+
+
+    //seeding the project Roles
+    private void seedProjectRoles() {
+        createRoleIfNotExists("OWNER", "Full project control");
+        createRoleIfNotExists("DEVELOPER", "Can edit issues and sprints");
+        createRoleIfNotExists("TESTER","Can edit issues and sprints");
+        createRoleIfNotExists("VIEWER", "Read-only access");
+    }
+
+    private void createRoleIfNotExists(String name, String description) {
+        if (projectRoleRepository.findByName(name).isEmpty()) {
+            projectRoleRepository.save(
+                    ProjectRole.builder()
+                            .name(name)
+                            .description(description)
+                            .build()
+            );
+        }
+    }
+
 }
