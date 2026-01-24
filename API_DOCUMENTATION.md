@@ -5,7 +5,7 @@ This document outlines the API endpoints for the Issue Tracker application.
 ## 1. Authentication
 
 ### Register
-
+    
 **Endpoint:** `POST /api/auth/register`
 **Description:** Registers a new user and returns a JWT token.
 
@@ -180,7 +180,7 @@ This document outlines the API endpoints for the Issue Tracker application.
   "priorityId": 2,
   "reporterId": 1,
   "assigneeId": 2,
-  "dueDate": "2023-12-31" // Optional
+  "dueDate": "2023-12-31" 
 }
 ```
 
@@ -489,3 +489,78 @@ _(Note: `typeId` maps to Issue Type e.g., Bug, Task. `priorityId` maps to Priori
 **Description:** Retrieves the Kanban board for a specific sprint.
 
 **Response Body:** Similar structure to Project Board, but grouped by Sprint context.
+
+---
+
+## 8. Chat & WebSockets
+
+The application uses WebSockets with STOMP protocol for real-time chat functionality.
+
+### Connection Details
+
+**Endpoint:** `ws://localhost:8080/ws`
+**Protocol:** STOMP over WebSocket (with SockJS support)
+**Authentication:** Requires a JWT token in the `CONNECT` frame header.
+
+```json
+{
+  "Authorization": "Bearer <JWT_TOKEN>"
+}
+```
+
+### Destination Prefixes
+
+- **From Client to Server:** `/app`
+- **From Server to Client:** `/topic`
+
+---
+
+### Endpoints (Client to Server)
+
+#### Send Message
+
+**Destination:** `/app/chat.send`
+**Payload:**
+
+```json
+{
+  "receiverId": 2,
+  "content": "Hello, how are you?"
+}
+```
+
+#### Mark Conversation as Read
+
+**Destination:** `/app/chat.read`
+**Payload:**
+
+```json
+{
+  "conversationId": 1
+}
+```
+
+---
+
+### Subscriptions (Server to Client)
+
+#### Receive Messages
+
+**Topic:** `/topic/conversation.{conversationId}`
+**Payload:**
+
+```json
+{
+    "conversationId": 1,
+    "messageId": 10,
+    "senderId": 1,
+    "content": "Hello, how are you?",
+    "sequenceNo": 5,
+    "sentAt": "2023-10-27T12:00:00"
+}
+```
+
+#### Receive Read Receipts
+
+**Topic:** `/topic/conversation.{conversationId}.receipts`
+**Payload:** `Long` (The User ID who read the messages)

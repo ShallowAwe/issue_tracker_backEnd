@@ -1,31 +1,35 @@
 package com.rudra.issue_tracker.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-
 
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "project_teams", 
+       uniqueConstraints = @UniqueConstraint(columnNames = {"project_id", "team_id"}))
 @Data
-@Table(name = "project_teams", uniqueConstraints = @UniqueConstraint(columnNames = {"Project_id","team_id"}))
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class ProjectTeam {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
-    private Project project;
-    @ManyToOne
-    private Team team;
-    @CreationTimestamp
-    private LocalDateTime assignAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    @ToString.Exclude
+    private Project project;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id", nullable = false)
+    @ToString.Exclude
+    private Team team;
+
+    @CreationTimestamp
+    @Column(name = "assigned_at", updatable = false)
+    private LocalDateTime assignedAt;
 }

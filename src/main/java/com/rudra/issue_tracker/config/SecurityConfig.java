@@ -43,8 +43,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,   "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.POST,   "/swagger-ui/**").permitAll()
 
+
                         // ✅ SWAGGER
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/ws/**").permitAll()
 
                         // ✅ EVERYTHING ELSE NEEDS JWT
                         .anyRequest().authenticated()
@@ -55,7 +56,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // ✅ HARD-WIRED AUTHENTICATION ENGINE (NO AUTOCONFIG GUESSING)
+    // ✅ HARD-WIRED AUTHENTICATION ENGINE (NO AUTO-CONFIG GUESSING)
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration config

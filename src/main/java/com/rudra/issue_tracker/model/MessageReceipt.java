@@ -2,37 +2,37 @@ package com.rudra.issue_tracker.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "team_members", 
-       uniqueConstraints = @UniqueConstraint(columnNames = {"team_id", "user_id"}))
+@Table(name = "message_receipts")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TeamMember {
+@Getter
+@Setter
+public class MessageReceipt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_id", nullable = false)
+    @JoinColumn(name = "message_id", nullable = false)
     @ToString.Exclude
-    private Team team;
+    private Message message;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @ToString.Exclude
     private User user;
 
-    @Column(name = "role_in_team", length = 50)
-    private String roleInTeam;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "status_id", nullable = false)
+    private MessageReceiptStatus status;
 
-    @CreationTimestamp
-    @Column(name = "joined_at", updatable = false)
-    private LocalDateTime joinedAt;
+    @Column(nullable = false)
+    private LocalDateTime timestamp;
 }

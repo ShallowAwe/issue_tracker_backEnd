@@ -4,6 +4,8 @@ package com.rudra.issue_tracker.controller.dto;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Data
 @Getter
 @Setter
@@ -27,5 +29,5 @@ public class CreateIssueRequest {
 
     private Long assigneeId;
 
-    private String dueDate;        // ISO string, e.g. "2025-12-31"
+    private LocalDateTime dueDate;        // ISO string, e.g. "2025-12-31"
 }

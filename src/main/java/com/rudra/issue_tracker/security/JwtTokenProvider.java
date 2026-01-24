@@ -5,7 +5,6 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -33,29 +32,24 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Generates a JWT token using Spring Security Authentication object.
-     */
-    public String generateToken(Authentication authentication) {
-        return generateToken(authentication.getName());
-    }
-
-    /**
-     * Generates a JWT token using a username as the subject.
+     * Generates a JWT token using a username as the subject and userId as a claim.
      * The token contains:
      * - subject (username)
+     * - userId (custom claim)
      * - issued timestamp
      * - expiration timestamp
      */
-    public String generateToken(String username) {
+    public String generateToken(String username, Long userId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
         return Jwts.builder()
-                .setSubject(username)          // Sets the token subject (user identifier)
-                .setIssuedAt(now)              // Token creation time
-                .setExpiration(expiryDate)    // Token expiry time
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256) // Secure signature
-                .compact();                    // Builds the token
+                .setSubject(username)
+                .claim("userId", userId.toString())  // Store userId as string for consistency
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     /**
@@ -71,6 +65,22 @@ public class JwtTokenProvider {
                 .getBody();
 
         return claims.getSubject(); // Returns the stored username
+    }
+
+    /**
+     * Extracts the userId from a valid JWT token.
+     * Returns userId as String for use as Principal name in WebSocket connections.
+     */
+    public String getUserIdFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setAllowedClockSkewSeconds(60)
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        // Extract userId from custom claim
+        return claims.get("userId", String.class);
     }
 
     /**

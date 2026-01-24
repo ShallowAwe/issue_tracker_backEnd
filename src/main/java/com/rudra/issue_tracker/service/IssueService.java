@@ -28,6 +28,7 @@ public class IssueService {
                              IssueType type,
                              IssuePriority priority,
                              User reporter,
+                             LocalDateTime dueDate,
                              User assignee) {
 
         Project project = projectService.getByKey(projectKey);
@@ -42,6 +43,7 @@ public class IssueService {
                 .summary(summary)
                 .description(description)
                 .type(type)
+                .dueDate(dueDate)
                 .priority(priority)
                 .status(defaultStatus()) // e.g. OPEN
                 .reporter(reporter)

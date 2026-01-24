@@ -48,6 +48,11 @@ public class ProjectService {
                 );
     }
 
+    public Project getByOwnerId(Long id){
+       return projectRepository.findByOwnerId(id)
+               .orElseThrow(()-> new NotFoundException("Project Not Found By OwnerId"+ id));
+    }
+
     /**
      * ✅ FETCH ALL PROJECTS
      */

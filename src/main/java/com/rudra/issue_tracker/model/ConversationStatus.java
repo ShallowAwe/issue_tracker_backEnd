@@ -5,28 +5,19 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "teams")
+@Table(name = "conversation_statuses")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Team {
+public class ConversationStatus {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
+    @Column(unique = true, nullable = false, length = 30)
     private String name;
-
-    @Column(length = 500)
-    private String description;
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
 }

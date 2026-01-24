@@ -1,14 +1,8 @@
 // config/DataSeeder.java
 package com.rudra.issue_tracker.config;
 
-import com.rudra.issue_tracker.model.IssuePriority;
-import com.rudra.issue_tracker.model.IssueStatus;
-import com.rudra.issue_tracker.model.IssueType;
-import com.rudra.issue_tracker.model.ProjectRole;
-import com.rudra.issue_tracker.repository.IssuePriorityRepository;
-import com.rudra.issue_tracker.repository.IssueStatusRepository;
-import com.rudra.issue_tracker.repository.IssueTypeRepository;
-import com.rudra.issue_tracker.repository.ProjectRoleRepository;
+import com.rudra.issue_tracker.model.*;
+import com.rudra.issue_tracker.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -21,6 +15,10 @@ public class DataSeeder implements CommandLineRunner {
     private final IssuePriorityRepository issuePriorityRepository;
     private final IssueStatusRepository issueStatusRepository;
     private final ProjectRoleRepository projectRoleRepository;
+    private final ConversationStatusRepository conversationStatusRepository;
+    private final DeliveryStatusRepository deliveryStatusRepository;
+    private final MessageReceiptStatusRepository messageReceiptStatusRepository;
+    private final ContentTypeRepository contentTypeRepository;
 
     @Override
     public void run(String... args) {
@@ -28,6 +26,10 @@ public class DataSeeder implements CommandLineRunner {
         seedIssuePriorities();
         seedIssueStatuses();
         seedProjectRoles();
+        seedConversationStatuses();
+        seedDeliveryStatuses();
+        seedMessageReceiptStatuses();
+        seedContentTypes();
     }
 
     private void seedIssueTypes() {
@@ -63,6 +65,73 @@ public class DataSeeder implements CommandLineRunner {
                     IssuePriority.builder()
                             .name(name)
                             .weight(weight)
+                            .build()
+            );
+        }
+    }
+    
+    // Injecting the enum data for Conversation Status
+    private void seedConversationStatuses(){
+        createConversationStatusIfNotExists("ACTIVE");
+        createConversationStatusIfNotExists("ARCHIVED");
+        createConversationStatusIfNotExists("BLOCKED");
+    }
+    /// Initalization of the for seeding the Conversation Status data
+    private void createConversationStatusIfNotExists(String name){
+        if(conversationStatusRepository.findByName(name).isEmpty()){
+            conversationStatusRepository.save(
+                    ConversationStatus.builder()
+                            .name(name)
+                            .build()
+            );
+        }
+    }
+
+    // Seeding Delivery Status data
+    private void seedDeliveryStatuses() {
+        createDeliveryStatusIfNotExists("SENT");
+        createDeliveryStatusIfNotExists("DELIVERED");
+        createDeliveryStatusIfNotExists("READ");
+    }
+
+    private void createDeliveryStatusIfNotExists(String name) {
+        if (deliveryStatusRepository.findByName(name).isEmpty()) {
+            deliveryStatusRepository.save(
+                    DeliveryStatus.builder()
+                            .name(name)
+                            .build()
+            );
+        }
+    }
+
+    // Seeding Message Receipt Status data
+    private void seedMessageReceiptStatuses() {
+        createMessageReceiptStatusIfNotExists("DELIVERED");
+        createMessageReceiptStatusIfNotExists("READ");
+    }
+
+    private void createMessageReceiptStatusIfNotExists(String name) {
+        if (messageReceiptStatusRepository.findByName(name).isEmpty()) {
+            messageReceiptStatusRepository.save(
+                    MessageReceiptStatus.builder()
+                            .name(name)
+                            .build()
+            );
+        }
+    }
+
+    // Seeding Content Type data
+    private void seedContentTypes() {
+        createContentTypeIfNotExists("TEXT");
+        createContentTypeIfNotExists("IMAGE");
+        createContentTypeIfNotExists("SYSTEM");
+    }
+
+    private void createContentTypeIfNotExists(String name) {
+        if (contentTypeRepository.findByName(name).isEmpty()) {
+            contentTypeRepository.save(
+                    ContentType.builder()
+                            .name(name)
                             .build()
             );
         }

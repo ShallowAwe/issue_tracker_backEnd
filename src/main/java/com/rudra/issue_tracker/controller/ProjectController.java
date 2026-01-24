@@ -110,6 +110,26 @@ public class ProjectController {
     }
 
     /**
+     * Get the project by owner id
+     **/
+
+    @GetMapping("/getByOwner/{id}")
+    public ResponseEntity<Project> getProjectByOwnerId(@PathVariable Long ownerId) {
+
+        if (ownerId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Project project = projectService.getByOwnerId(ownerId);
+
+        if (project == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(project);
+    }
+
+    /**
      * ✅ GET PROJECT BY KEY
      */
     @GetMapping("/{key}/get")

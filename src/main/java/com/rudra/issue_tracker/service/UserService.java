@@ -1,5 +1,6 @@
 package com.rudra.issue_tracker.service;
 
+import com.rudra.issue_tracker.controller.dto.UserDetailsResponse;
 import com.rudra.issue_tracker.exceptions.NotFoundException;
 import com.rudra.issue_tracker.model.User;
 import com.rudra.issue_tracker.repository.UserRepository;
@@ -7,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -43,8 +42,7 @@ public class UserService {
 
         // Encrypt the raw password before storing
         user.setPasswordHash(
-                passwordEncoder.encode(user.getPasswordHash())
-        );
+                passwordEncoder.encode(user.getPasswordHash()));
         user.setIsActive(true);
 
         // Persist and return the saved user
@@ -57,9 +55,7 @@ public class UserService {
      */
     public User findById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() ->
-                        new NotFoundException("User not found: " + id)
-                );
+                .orElseThrow(() -> new NotFoundException("User not found: " + id));
     }
 
     /**
@@ -68,11 +64,21 @@ public class UserService {
      */
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() ->
-                        new NotFoundException("User not found: " + username)
-                );
+                .orElseThrow(() -> new NotFoundException("User not found: " + username));
     }
 
+    public UserDetailsResponse getUserDetailsByUsername(String username) {
 
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return new UserDetailsResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getIsActive());
+    }
 
 }

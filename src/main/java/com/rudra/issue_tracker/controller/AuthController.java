@@ -19,7 +19,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -47,40 +46,48 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
 
+        log.info("AUTH | Register attempt | username={} email={}",
+                request.getUsername(), request.getEmail());
+
         try {
-            // Build user entity from request
             User user = User.builder()
                     .username(request.getUsername())
                     .email(request.getEmail())
-                    .passwordHash(request.getPassword()) // Raw password → encoded in service
+                    .passwordHash(request.getPassword())
                     .firstName(request.getFirstName())
                     .lastName(request.getLastName())
                     .build();
 
-            // Persist user using service
             User createdUser = userService.createUser(user);
 
-            // Generate JWT token
-            String jwt = jwtTokenProvider.generateToken(createdUser.getUsername());
+            log.info("AUTH | Register success | userId={} username={}",
+                    createdUser.getId(), createdUser.getUsername());
 
-            // Return token + user id
-            return ResponseEntity.ok(
-                    new AuthResponse(jwt, createdUser.getId())
+            String jwt = jwtTokenProvider.generateToken(
+                    createdUser.getUsername(),
+                    createdUser.getId()
             );
 
+            return ResponseEntity.ok(new AuthResponse(jwt));
+
         } catch (IllegalStateException ex) {
-            // Thrown when username or email already exists
+            log.warn("AUTH | Register failed | reason={} username={}",
+                    ex.getMessage(), request.getUsername());
+
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(ex.getMessage());
 
         } catch (Exception ex) {
-            // Any unexpected failure
+            log.error("AUTH | Register error | username={}",
+                    request.getUsername(), ex);
+
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Registration failed due to server error");
         }
     }
+
 
     /**
      * ✅ USER LOGIN
@@ -91,8 +98,9 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@Validated @RequestBody LoginRequest request) {
 
+        log.info("AUTH | Login attempt | username={}", request.getUsername());
+
         try {
-            // Authenticate username + password
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getUsername(),
@@ -100,48 +108,59 @@ public class AuthController {
                     )
             );
 
-            // Store authentication in security context
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // Generate JWT token
-            String jwt = jwtTokenProvider.generateToken(authentication);
-
-            // Fetch user from database
             User user = userService.findByUsername(request.getUsername());
 
-            // Return token + user id
-            return ResponseEntity.ok(
-                    new AuthResponse(jwt, user.getId())
+            log.info("AUTH | Login success | userId={} username={}",
+                    user.getId(), user.getUsername());
+
+            String jwt = jwtTokenProvider.generateToken(
+                    user.getUsername(),
+                    user.getId()
             );
 
+            return ResponseEntity.ok(new AuthResponse(jwt));
+
         } catch (BadCredentialsException ex) {
-            // Invalid login credentials
+            log.warn("AUTH | Login failed | bad credentials | username={}",
+                    request.getUsername());
+
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body("Invalid username or password");
 
         } catch (Exception ex) {
+            log.error("AUTH | Login error | username={}",
+                    request.getUsername(), ex);
 
-            // Any unexpected failure
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Login failed due to server error");
         }
     }
 
+    //Mapp this endpoint to a DTO  for response./././././.
     @GetMapping("/user-details")
-    public ResponseEntity<User> getUserDetails(Authentication authentication) {
+    public ResponseEntity<UserDetailsResponse> getUserDetails(
+            Authentication authentication
+    ) {
+        if (authentication == null) {
+            log.warn("AUTH | User-details access without authentication");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         String username = authentication.getName();
+        log.info("AUTH | Fetch user-details | username={}", username);
 
-        User userDetails = userService.findByUsername(username);
+        UserDetailsResponse userDetails =
+                userService.getUserDetailsByUsername(username);
 
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        log.info("AUTH | User-details fetched | username={}", username);
 
         return ResponseEntity.ok(userDetails);
     }
+
 
 
 
